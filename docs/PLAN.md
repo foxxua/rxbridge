@@ -1,284 +1,270 @@
-# RxBridge: план навчання від простого до складного
+# RxBridge: Roadmap
 
-Створено 12.10.2026
+Created 2026-10-12
 
-## Структура репозиторіїв
+## Repository structure
 
-Головний репозиторій `rxbridge` підключає сервіси як git submodules. Кожен репо створюється тоді, коли до нього доходить етап.
+The umbrella repository `rxbridge` links the services as git submodules. Each repository is created when its stage begins.
 
-| Репозиторій | Що в ньому | Мова | Етап |
+| Repository | Contents | Language | Stage |
 | --- | --- | --- | --- |
-| `rxbridge` | Головний: submodules, `compose.yaml`, docs, PLAN, ADR, `CLAUDE.md`, налаштування Keycloak і Grafana | — | 1 |
-| `rxbridge-enrollment-service` | Пацієнти, реєстрації | Java | 1 |
+| `rxbridge` | Umbrella: submodules, `compose.yaml`, docs, plan, ADRs, Keycloak and Grafana configuration | — | 1 |
+| `rxbridge-enrollment-service` | Patients, enrollments | Java | 1 |
 | `rxbridge-web-ui` | Thymeleaf + htmx + Web Components, BFF | Java | 2 |
-| `rxbridge-adverse-event-service` | Звіти про побічні ефекти | Java | 4 |
-| `rxbridge-salesforce-sync-service` | Інтеграція з Salesforce, Pub/Sub API | Java | 5 |
-| `rxbridge-events` | Спільна бібліотека контрактів подій, публікується в GitHub Packages | Java | 6 |
-| `rxbridge-import-service` | Імпорт CSV, Spring Batch | Java | 7 |
-| `rxbridge-config` | Конфігурації всіх сервісів для Config Server | YAML | 8 |
+| `rxbridge-adverse-event-service` | Adverse event reports | Java | 4 |
+| `rxbridge-salesforce-sync-service` | Salesforce integration, Pub/Sub API | Java | 5 |
+| `rxbridge-events` | Shared event contracts library, published to GitHub Packages | Java | 6 |
+| `rxbridge-import-service` | CSV import, Spring Batch | Java | 7 |
+| `rxbridge-config` | Configuration of all services for Config Server | YAML | 8 |
 | `rxbridge-config-server` | Spring Cloud Config Server | Java | 8 |
 | `rxbridge-discovery-server` | Eureka | Java | 8 |
 | `rxbridge-api-gateway` | Spring Cloud Gateway | Java | 8 |
-| `rxbridge-notification-service` | Сповіщення, ескалації | Kotlin | 10 |
-| `rxbridge-inventory-service` | Склади, резерви, Saga | Kotlin | 11 |
+| `rxbridge-notification-service` | Notifications, escalations | Kotlin | 10 |
+| `rxbridge-inventory-service` | Warehouses, stock reservations, saga | Kotlin | 11 |
 
-Робота з submodules:
-- Клонувати: `git clone --recurse-submodules`
-- Після коміту в сервісі — окремий коміт у `rxbridge` з оновленим посиланням на submodule. Так головний репо фіксує сумісний набір версій сервісів
-- Claude Code відкривати в корені `rxbridge`
+Working with submodules:
+- Clone: `git clone --recurse-submodules`
+- After committing in a service, make a separate commit in `rxbridge` with the updated submodule reference. This way the umbrella repository pins a compatible set of service versions.
+- Push the service before pushing `rxbridge`, so the referenced commit exists on the remote.
 
-## Як працювати з планом
+## Principles
 
-14 етапів від простого до складного: кожна нова технологія з'являється тоді, коли без неї вже незручно. Так ви розумієте не лише «як», а й «навіщо» — саме про це питають на співбесідах.
+14 stages from simple to complex: each new technology is introduced only when working without it becomes painful. The goal is to understand not only *how* but also *why*.
 
-- **Інфраструктура відкладається.** Перші 7 етапів — без Eureka, Gateway і Config Server: сервіси бачать один одного за адресами з `application.yml`. Spring Cloud з'являється на етапі 8, коли сервісів уже 4–5 і ручні налаштування стають болем.
-- **Тести одразу.** Кожен етап включає тести того, що в ньому зроблено, а не «потім».
-- **Кожен етап закінчується робочою версією** і тегом версії в змінених репо (`v0.1.0`, `v0.2.0`…) та в `rxbridge`. Історія видна роботодавцю.
-- **Окремий репозиторій на сервіс** (Gradle-проєкт у кожному), зібрані в `rxbridge` через submodules. Новий сервіс — новий репо.
-- **ADR** (короткий запис рішення) — коли робите вибір між підходами. 5–10 рядків англійською.
-- Секрети тільки в `.env`, який у `.gitignore`.
+- **Infrastructure is deferred.** Stages 1–7 have no Eureka, Gateway or Config Server: services find each other via addresses in `application.yml`. Spring Cloud arrives in stage 8, when there are 4–5 services and manual configuration becomes a burden.
+- **Tests from the start.** Every stage includes tests for what it delivers, not "later".
+- **Every stage ends with a working version** and a version tag in the changed repositories (`v0.1.0`, `v0.2.0`, …) and in `rxbridge`.
+- **One repository per service**, each with its own Gradle build, combined in `rxbridge` via submodules. A new service means a new repository.
+- **ADRs** (architecture decision records): a short note whenever choosing between approaches, 5–10 lines.
+- Secrets live only in `.env`, which is git-ignored.
 
-Складність кожного етапу вказана в заголовку: легко, середньо або складно.
+Each stage heading states its difficulty: easy, medium or hard.
 
-## Етап 1 — Перший сервіс: enrollment-service (легко)
+## Stage 1: First service, enrollment-service (easy)
 
-Один сервіс з REST API для пацієнтів і реєстрацій на препарати. Інфраструктура — лише PostgreSQL у `compose.yaml`, який Spring Boot піднімає сам (модуль `spring-boot-docker-compose`).
+A single service with a REST API for patients and medication enrollments. The only infrastructure is PostgreSQL in `compose.yaml`, started by Spring Boot itself (`spring-boot-docker-compose`).
 
-**Що вивчаєте:** структура Spring Boot 3, шари Controller → Service → Repository, Spring Data JPA, Flyway, Bean Validation, Java 21.
+**Topics:** Spring Boot 4 project structure, Controller → Service → Repository layers, Spring Data JPA, Flyway, Bean Validation, Java 25.
 
-- [ ] Репо `rxbridge` (README-заготовка, `.gitignore`, `docs/PLAN.md`, `CLAUDE.md`)
-- [ ] Репо `rxbridge-enrollment-service` (Gradle, Spring Initializr), підключити як submodule
-- [ ] Сутності `Patient`, `Enrollment`, `Medication`; міграції Flyway
-- [ ] DTO як `record`, статус реєстрації як `sealed interface` або `enum` + `switch` з pattern matching
-- [ ] CRUD-ендпоінти, пагінація і сортування
-- [ ] Валідація: `@Valid`, власний валідатор формату коду препарату
-- [ ] Обробка помилок через `@RestControllerAdvice` і `ProblemDetail`
+- [ ] `rxbridge` repository (README skeleton, `.gitignore`, `docs/PLAN.md`)
+- [ ] `rxbridge-enrollment-service` repository (Gradle, Spring Initializr), added as a submodule
+- [ ] `Patient`, `Enrollment`, `Medication` entities; Flyway migrations
+- [ ] DTOs as `record`s; enrollment status as a `sealed interface` or `enum` with pattern-matching `switch`
+- [ ] CRUD endpoints with pagination and sorting
+- [ ] Validation: `@Valid`, a custom validator for the medication code format
+- [ ] Error handling with `@RestControllerAdvice` and `ProblemDetail`
 - [ ] `spring.threads.virtual.enabled=true`
-- [ ] Swagger UI через springdoc-openapi
-- [ ] Тести: unit (JUnit 5 + Mockito), `@WebMvcTest`, `@DataJpaTest` з Testcontainers
+- [ ] Swagger UI via springdoc-openapi
+- [ ] Tests: unit (JUnit 5 + Mockito), `@WebMvcTest`, `@DataJpaTest` with Testcontainers
 
-**Готово, коли:** можна створити пацієнта й реєстрацію через Swagger, тести зелені.
+**Done when:** a patient and an enrollment can be created via Swagger UI and all tests pass.
 
-## Етап 2 — Веб-інтерфейс web-ui: Thymeleaf + htmx (легко)
+## Stage 2: web-ui with Thymeleaf and htmx (easy)
 
-Окремий репо `rxbridge-web-ui`, який викликає enrollment-service напряму за адресою з конфігурації. Без безпеки й без Gateway — це прийде пізніше.
+A separate `rxbridge-web-ui` repository that calls enrollment-service directly at a configured address. No security and no Gateway yet.
 
-**Що вивчаєте:** Thymeleaf (шаблони, layout, фрагменти), htmx, `RestClient` для виклику іншого сервісу.
+**Topics:** Thymeleaf (templates, layouts, fragments), htmx, `RestClient` for calling another service.
 
-- [ ] Сторінки: список пацієнтів, картка пацієнта, форма реєстрації
-- [ ] Спільний layout (шапка, меню) через фрагменти Thymeleaf
-- [ ] htmx: пошук без перезавантаження, пагінація, відправка форми з показом помилок валідації
-- [ ] `RestClient` з базовою адресою з `application.yml`; обробка помилок сервісу
-- [ ] JS і CSS локально (WebJars або `static/`), без CDN
-- [ ] Тести контролерів через `@WebMvcTest` з замоканим клієнтом
+- [ ] Pages: patient list, patient details, enrollment form
+- [ ] Shared layout (header, menu) with Thymeleaf fragments
+- [ ] htmx: search without page reload, pagination, form submission with validation errors
+- [ ] `RestClient` with a base URL from `application.yml`; handling of service errors
+- [ ] JS and CSS served locally (WebJars or `static/`), no CDN
+- [ ] Controller tests with `@WebMvcTest` and a mocked client
 
-**Готово, коли:** через браузер можна знайти пацієнта й зареєструвати його на препарат.
+**Done when:** a patient can be found and enrolled in a medication program through the browser.
 
-## Етап 3 — Spring Security базово (середньо)
+## Stage 3: Spring Security basics (medium)
 
-Логін у web-ui через форму і ролі. Користувачі поки в базі даних web-ui, без Keycloak — так ви зрозумієте сам механізм Spring Security, перш ніж його ускладнювати.
+Form login and roles in web-ui. Users are stored in the web-ui database, without Keycloak, to understand the Spring Security mechanics before adding complexity.
 
-**Що вивчаєте:** `SecurityFilterChain`, автентифікація vs авторизація, `UserDetailsService`, `PasswordEncoder`, ролі, CSRF, сесії.
+**Topics:** `SecurityFilterChain`, authentication vs authorization, `UserDetailsService`, `PasswordEncoder`, roles, CSRF, sessions.
 
-- [ ] Форма логіну, користувачі з BCrypt-паролями в базі
-- [ ] Ролі `PHARMACY_OPERATOR` і `ADMIN`; обмеження URL і `@PreAuthorize` на методах
-- [ ] Thymeleaf Extras Spring Security: показувати кнопки за роллю
-- [ ] CSRF-токен у заголовках запитів htmx
-- [ ] Cookie сесії: `HttpOnly`, `Secure`, `SameSite`; заголовок Content Security Policy
-- [ ] Тести з `@WithMockUser` і `spring-security-test`
+- [ ] Login form; users with BCrypt passwords in the database
+- [ ] `PHARMACY_OPERATOR` and `ADMIN` roles; URL restrictions and method-level `@PreAuthorize`
+- [ ] Thymeleaf Extras Spring Security: show buttons by role
+- [ ] CSRF token in htmx request headers
+- [ ] Session cookie: `HttpOnly`, `Secure`, `SameSite`; Content Security Policy header
+- [ ] Tests with `@WithMockUser` and `spring-security-test`
 
-**Готово, коли:** оператор має доступ лише до своїх дій, адмін — до всього; запит без CSRF-токена відхиляється.
+**Done when:** an operator can access only their own actions, an admin can access everything, and a request without a CSRF token is rejected.
 
-## Етап 4 — Другий сервіс і виклики між сервісами (середньо)
+## Stage 4: Second service and inter-service calls (medium)
 
-Новий `adverse-event-service` зі своєю базою. При створенні звіту він перевіряє в enrollment-service, що пацієнт існує, — перший синхронний виклик між сервісами і перша ситуація «а що, коли інший сервіс впав?».
+A new `adverse-event-service` with its own database. When a report is created, it checks with enrollment-service that the patient exists: the first synchronous call between services and the first "what if the other service is down?" situation.
 
-**Що вивчаєте:** database-per-service, OpenFeign, Resilience4j (timeout, retry, circuit breaker), перший веб-компонент.
+**Topics:** database per service, OpenFeign, Resilience4j (timeout, retry, circuit breaker), the first web component.
 
-- [ ] Репо `rxbridge-adverse-event-service` (submodule), окрема база PostgreSQL
-- [ ] Клієнт до enrollment-service через OpenFeign
-- [ ] Resilience4j: timeout, retry, circuit breaker; зрозуміла помилка, якщо сервіс недоступний
-- [ ] Поле «серйозність» і дедлайн обробки звіту
-- [ ] У web-ui: перший веб-компонент (Lit або чистий JS) — таблиця звітів з фільтрами
-- [ ] Тести клієнта з WireMock: успіх, таймаут, 500
+- [ ] `rxbridge-adverse-event-service` repository (submodule) with its own PostgreSQL database
+- [ ] enrollment-service client via OpenFeign
+- [ ] Resilience4j: timeout, retry, circuit breaker; a clear error when the service is unavailable
+- [ ] Severity field and report processing deadline
+- [ ] In web-ui: the first web component (Lit or plain JS), a report table with filters
+- [ ] Client tests with WireMock: success, timeout, 500
 
-**Готово, коли:** вимкнули enrollment-service — adverse-event-service відповідає контрольованою помилкою, а не падає.
+**Done when:** with enrollment-service stopped, adverse-event-service responds with a controlled error instead of failing.
 
-## Етап 5 — Інтеграція з Salesforce (середньо)
+## Stage 5: Salesforce integration (medium)
 
-Новий `salesforce-sync-service`. Тут ви сильніші за більшість Java-кандидатів, тому етап іде рано: він дасть впевненість і перший «вау»-пункт для резюме. Поки дані передаються простим HTTP-викликом, без черг.
+A new `salesforce-sync-service`. For now data is sent via a plain HTTP call, without queues.
 
-**Що вивчаєте:** OAuth 2.0 JWT Bearer з боку Java, `RestClient` для зовнішнього API, робота з лімітами.
+**Topics:** OAuth 2.0 JWT Bearer flow from Java, `RestClient` for an external API, working with API limits.
 
-- [ ] Репо `rxbridge-salesforce-sync-service` (submodule)
-- [ ] Salesforce Developer Edition org, об'єкти `Patient_Enrollment__c`, `Adverse_Event__c` з `External_Id__c`
-- [ ] Connected App з сертифікатом; отримання токена за JWT Bearer flow, кешування до закінчення строку
-- [ ] Upsert за External Id через Composite API (до 25 записів за запит)
-- [ ] Обробка помилок Salesforce: часткові помилки в Composite, 401 (оновити токен), `REQUEST_LIMIT_EXCEEDED`
-- [ ] enrollment-service після збереження викликає sync-service напряму
-- [ ] У web-ui: статус синхронізації запису
-- [ ] Тести з WireMock, що імітує відповіді Salesforce
+- [ ] `rxbridge-salesforce-sync-service` repository (submodule)
+- [ ] Salesforce Developer Edition org with `Patient_Enrollment__c` and `Adverse_Event__c` objects and `External_Id__c`
+- [ ] Connected App with a certificate; token via JWT Bearer flow, cached until expiry
+- [ ] Upsert by External Id via Composite API (up to 25 records per request)
+- [ ] Salesforce error handling: partial failures in Composite, 401 (refresh token), `REQUEST_LIMIT_EXCEEDED`
+- [ ] enrollment-service calls sync-service directly after saving
+- [ ] In web-ui: record sync status
+- [ ] Tests with WireMock simulating Salesforce responses
 
-**Готово, коли:** реєстрація з web-ui з'являється в Salesforce org.
+**Done when:** an enrollment created in web-ui appears in the Salesforce org.
 
-**Проблема, яку ви помітите:** якщо sync-service недоступний у момент збереження, дані не дійдуть. Це підводить до етапу 6.
+**Known problem:** if sync-service is unavailable at save time, the data is lost. This leads to stage 6.
 
-## Етап 6 — Outbox і Kafka (середньо)
+## Stage 6: Outbox and Kafka (medium)
 
-Прямий виклик замінюємо надійною доставкою: enrollment-service пише подію в таблицю outbox у тій самій транзакції, а окремий процес публікує її в Kafka. Kafka додається в `compose.yaml` — це перша справжня інфраструктура.
+The direct call is replaced with reliable delivery: enrollment-service writes an event to an outbox table in the same transaction, and a separate process publishes it to Kafka. Kafka is added to `compose.yaml`, the first real piece of infrastructure.
 
-**Що вивчаєте:** транзакційний outbox, Spring Kafka, at-least-once доставка, ідемпотентні споживачі, dead letter topic, версіонування спільної бібліотеки контрактів.
+**Topics:** transactional outbox, Spring Kafka, at-least-once delivery, idempotent consumers, dead letter topic, versioning a shared contracts library.
 
-- [ ] Таблиця `outbox_event`; запис у тій самій транзакції, що й бізнес-дані
-- [ ] Публікатор: `@Scheduled` читає outbox і відправляє в Kafka
-- [ ] Репо `rxbridge-events`: події як `record`, формат JSON; публікація в GitHub Packages з semver-версією
-- [ ] Сервіси підключають `rxbridge-events` як залежність з версією; GitHub-токен для читання пакетів — у змінних середовища, не в коді
-- [ ] sync-service слухає Kafka; таблиця оброблених подій, щоб дублікат не обробився двічі
-- [ ] Retry і dead letter topic для подій, що не пройшли
-- [ ] Пачки: накопичувати події і відправляти в Composite API групами
-- [ ] Інтеграційні тести з Testcontainers Kafka
-- [ ] Перший ADR: «Чому outbox, а не пряма публікація в Kafka»
+- [ ] `outbox_event` table, written in the same transaction as the business data
+- [ ] Publisher: `@Scheduled` job reads the outbox and sends to Kafka
+- [ ] `rxbridge-events` repository: events as `record`s, JSON format; published to GitHub Packages with semver
+- [ ] Services depend on a versioned `rxbridge-events`; the GitHub token for reading packages comes from environment variables, not code
+- [ ] sync-service consumes from Kafka; a processed-events table so duplicates are not processed twice
+- [ ] Retry and dead letter topic for failed events
+- [ ] Batching: accumulate events and send them to Composite API in groups
+- [ ] Integration tests with Testcontainers Kafka
+- [ ] First ADR: "Why outbox instead of publishing directly to Kafka"
 
-**Готово, коли:** зупинили sync-service, зберегли 10 реєстрацій, запустили — усі 10 дійшли в Salesforce, без дублікатів.
+**Done when:** with sync-service stopped, 10 enrollments are saved; after restarting it, all 10 reach Salesforce with no duplicates.
 
-## Етап 7 — import-service на Spring Batch (середньо)
+## Stage 7: import-service with Spring Batch (medium)
 
-Масове завантаження CSV від аптек і дистрибуційних центрів. Тепер, коли є Kafka, імпорт просто публікує події, а решта системи вже вміє їх обробляти.
+Bulk CSV upload from pharmacies and distribution centers. With Kafka in place, the import simply publishes events, and the rest of the system already knows how to handle them.
 
-**Що вивчаєте:** Spring Batch (job, step, chunk, reader/processor/writer), skip і retry політики, перезапуск після збою, великі обсяги в Salesforce.
+**Topics:** Spring Batch (job, step, chunk, reader/processor/writer), skip and retry policies, restart after failure, large data volumes in Salesforce.
 
-- [ ] Репо `rxbridge-import-service` (submodule), завантаження файлу через web-ui
-- [ ] Job: читання CSV → валідація → запис → публікація подій
-- [ ] Невалідні рядки пропускаються і потрапляють у звіт помилок, а не валять весь файл
-- [ ] Перезапуск job з місця збою
-- [ ] У sync-service: для великих пачок Bulk API 2.0 замість Composite (вибір за кількістю записів)
-- [ ] Генератор синтетичних тестових даних, файл на 50 000 рядків
-- [ ] У web-ui: прогрес імпорту (htmx polling або веб-компонент)
+- [ ] `rxbridge-import-service` repository (submodule); file upload via web-ui
+- [ ] Job: read CSV → validate → write → publish events
+- [ ] Invalid rows are skipped and reported instead of failing the whole file
+- [ ] Restart a job from the point of failure
+- [ ] In sync-service: Bulk API 2.0 instead of Composite for large batches (chosen by record count)
+- [ ] Synthetic test data generator, a 50,000-row file
+- [ ] In web-ui: import progress (htmx polling or a web component)
 
-**Готово, коли:** файл на 50 000 рядків імпортується, помилкові рядки видно у звіті, дані в Salesforce.
+**Done when:** a 50,000-row file is imported, invalid rows are visible in the error report, and the data is in Salesforce.
 
-## Етап 8 — Spring Cloud: Config, Eureka, Gateway (складно)
+## Stage 8: Spring Cloud: Config, Eureka, Gateway (hard)
 
-У вас 5 сервісів, адреси й налаштування розкидані по `application.yml`, порти треба пам'ятати. Тепер Spring Cloud вирішує реальну проблему, і ви зможете пояснити, навіщо він.
+With 5 services, addresses and settings are scattered across `application.yml` files and ports must be remembered. Now Spring Cloud solves a real problem.
 
-**Що вивчаєте:** централізована конфігурація, service discovery, client-side load balancing, API Gateway, профілі середовищ.
+**Topics:** centralized configuration, service discovery, client-side load balancing, API Gateway, environment profiles.
 
-- [ ] Репо `rxbridge-config`: налаштування всіх сервісів, профілі `local` і `docker`
-- [ ] `rxbridge-config-server` читає конфігурацію з `rxbridge-config`
-- [ ] `rxbridge-discovery-server` (Eureka); Feign-клієнти звертаються за іменем сервісу, а не адресою
-- [ ] `rxbridge-api-gateway` (Spring Cloud Gateway): маршрути, rate limiting, CORS
-- [ ] web-ui ходить до сервісів лише через Gateway
-- [ ] Запуск двох екземплярів enrollment-service — перевірити балансування
-- [ ] Повний `compose.yaml`: усі сервіси + інфраструктура, healthchecks і порядок старту
-- [ ] ADR: «Eureka vs Kubernetes service discovery» (знати різницю для співбесід)
+- [ ] `rxbridge-config` repository: settings for all services, `local` and `docker` profiles
+- [ ] `rxbridge-config-server` reads configuration from `rxbridge-config`
+- [ ] `rxbridge-discovery-server` (Eureka); Feign clients call services by name, not address
+- [ ] `rxbridge-api-gateway` (Spring Cloud Gateway): routes, rate limiting, CORS
+- [ ] web-ui calls services only through the Gateway
+- [ ] Run two instances of enrollment-service and verify load balancing
+- [ ] Full `compose.yaml`: all services plus infrastructure, health checks and startup order
+- [ ] ADR: "Eureka vs Kubernetes service discovery"
 
-**Готово, коли:** `docker compose up` піднімає всю систему однією командою.
+**Done when:** `docker compose up` starts the whole system with one command.
 
-## Етап 9 — Keycloak, OAuth2 і BFF (складно)
+## Stage 9: Keycloak, OAuth2 and BFF (hard)
 
-Власні користувачі з етапу 3 замінюємо на Keycloak. web-ui стає Backend for Frontend: токени живуть на сервері, браузер має лише cookie сесії.
+The stage 3 users are replaced with Keycloak. web-ui becomes a Backend for Frontend: tokens live on the server, and the browser holds only a session cookie.
 
-**Що вивчаєте:** OAuth2 / OpenID Connect, Authorization Code flow, resource server, token relay, ролі з JWT.
+**Topics:** OAuth2 / OpenID Connect, Authorization Code flow, resource server, token relay, roles from JWT.
 
-- [ ] Keycloak у `compose.yaml`; realm, клієнти й ролі імпортуються з JSON при старті
-- [ ] web-ui: `oauth2Login`, вихід з системи, ролі з токена
-- [ ] Gateway: token relay — передає токен далі до сервісів
-- [ ] Кожен сервіс — resource server, перевіряє JWT і ролі
-- [ ] Фонові виклики між сервісами (без користувача): client credentials flow для сервісних акаунтів
-- [ ] Тести з `jwt()` у `spring-security-test`
-- [ ] ADR: «Чому BFF, а не токен у браузері»
+- [ ] Keycloak in `compose.yaml`; realm, clients and roles imported from JSON at startup
+- [ ] web-ui: `oauth2Login`, logout, roles from the token
+- [ ] Gateway: token relay passes the token on to services
+- [ ] Every service is a resource server that validates the JWT and roles
+- [ ] Background calls between services (no user): client credentials flow for service accounts
+- [ ] Tests with `jwt()` from `spring-security-test`
+- [ ] ADR: "Why BFF instead of tokens in the browser"
 
-**Готово, коли:** у браузері немає жодного токена (перевірити в DevTools), а сервіс без валідного JWT повертає 401.
+**Done when:** there are no tokens in the browser (checked in DevTools), and a service returns 401 without a valid JWT.
 
-## Етап 10 — Kotlin: notification-service (середньо)
+## Stage 10: Kotlin notification-service (medium)
 
-Перший сервіс на Kotlin навмисно простий: слухає події з Kafka і надсилає сповіщення. Так ви вчите мову, а не мову й складну логіку одночасно.
+The first Kotlin service is deliberately simple: it consumes Kafka events and sends notifications, so the focus is on the language rather than on complex logic.
 
-**Що вивчаєте:** синтаксис Kotlin, null-safety, data classes, extension functions, Spring Boot на Kotlin, використання Java-бібліотеки `rxbridge-events` з Kotlin.
+**Topics:** Kotlin syntax, null safety, data classes, extension functions, Spring Boot with Kotlin, using the Java `rxbridge-events` library from Kotlin.
 
-- [ ] Репо `rxbridge-notification-service` на Kotlin, Gradle Kotlin DSL
-- [ ] Слухає події «серйозний побічний ефект» і «реєстрацію схвалено»
-- [ ] Відправка email (Mailpit у `compose.yaml` для перегляду листів) і webhook
-- [ ] Шаблони листів
-- [ ] Ескалація: звіт не оброблено до дедлайну — повторне сповіщення адміну
-- [ ] Тести на Kotlin: JUnit 5 + MockK
+- [ ] `rxbridge-notification-service` repository in Kotlin, Gradle Kotlin DSL
+- [ ] Consumes "serious adverse event" and "enrollment approved" events
+- [ ] Email delivery (Mailpit in `compose.yaml` for viewing emails) and webhooks
+- [ ] Email templates
+- [ ] Escalation: a report not processed by its deadline triggers a repeat notification to an admin
+- [ ] Kotlin tests: JUnit 5 + MockK
 
-**Готово, коли:** створили серйозний звіт — лист видно в Mailpit; пропустили дедлайн — прийшла ескалація.
+**Done when:** creating a serious report produces an email in Mailpit, and a missed deadline produces an escalation.
 
-## Етап 11 — Saga: inventory-service на Kotlin (складно)
+## Stage 11: Saga with Kotlin inventory-service (hard)
 
-Залишки препаратів на складах дистрибуційних центрів. Реєстрація стає схваленою лише після резервування препарату; якщо резерву немає — реєстрація відхиляється автоматично. Це розподілена транзакція без спільної бази.
+Medication stock in distribution center warehouses. An enrollment is approved only after the medication is reserved; if no stock is available, the enrollment is rejected automatically. A distributed transaction without a shared database.
 
-**Що вивчаєте:** Saga pattern (хореографія через події), компенсуючі дії, оптимістичне блокування, Kotlin coroutines (опційно).
+**Topics:** Saga pattern (choreography via events), compensating actions, optimistic locking, Kotlin coroutines (optional).
 
-- [ ] Репо `rxbridge-inventory-service` на Kotlin: склади, залишки, резерви
-- [ ] Ланцюжок: `EnrollmentRequested` → `StockReserved` або `StockReservationFailed` → `EnrollmentApproved` або `EnrollmentRejected`
-- [ ] Компенсація: реєстрацію скасовано — резерв повертається на склад
-- [ ] Оптимістичне блокування (`@Version`), щоб два запити не забрали одну й ту саму одиницю
-- [ ] Стан саги видно в web-ui
-- [ ] Тест: 20 паралельних реєстрацій на 10 одиниць — рівно 10 схвалено
-- [ ] ADR: «Хореографія vs оркестрація саги»
+- [ ] `rxbridge-inventory-service` repository in Kotlin: warehouses, stock, reservations
+- [ ] Event chain: `EnrollmentRequested` → `StockReserved` or `StockReservationFailed` → `EnrollmentApproved` or `EnrollmentRejected`
+- [ ] Compensation: a cancelled enrollment returns the reserved stock
+- [ ] Optimistic locking (`@Version`) so two requests cannot take the same unit
+- [ ] Saga state visible in web-ui
+- [ ] Test: 20 concurrent enrollments for 10 units, exactly 10 approved
+- [ ] ADR: "Saga choreography vs orchestration"
 
-**Готово, коли:** паралельний тест проходить стабільно, а компенсація повертає залишки.
+**Done when:** the concurrency test passes consistently and compensation restores stock.
 
-## Етап 12 — Події з Salesforce через Pub/Sub API (складно)
+## Stage 12: Salesforce events via Pub/Sub API (hard)
 
-Двосторонній зв'язок: зміни, зроблені в Salesforce (наприклад, менеджер закрив звіт про побічний ефект), повертаються в систему. Це рідкісна навичка навіть серед Salesforce-розробників.
+Two-way integration: changes made in Salesforce (for example, a manager closing an adverse event report) flow back into the system.
 
-**Що вивчаєте:** gRPC у Java, Avro-схеми, Change Data Capture, replay ID, відновлення після розриву з'єднання.
+**Topics:** gRPC in Java, Avro schemas, Change Data Capture, replay IDs, recovery after disconnects.
 
-- [ ] Увімкнути Change Data Capture для `Adverse_Event__c` в org
-- [ ] gRPC-клієнт Pub/Sub API: підписка, отримання й кешування Avro-схеми, декодування подій
-- [ ] Зберігати останній replay ID, щоб після перезапуску не втратити й не повторити події
-- [ ] Захист від «відлуння»: зміна, яку відправили ви самі, не повертається назад у цикл
-- [ ] Події з Salesforce публікуються в Kafka і оновлюють adverse-event-service
-- [ ] Перепідключення з backoff при розриві
+- [ ] Enable Change Data Capture for `Adverse_Event__c` in the org
+- [ ] Pub/Sub API gRPC client: subscription, fetching and caching Avro schemas, decoding events
+- [ ] Persist the last replay ID so restarts neither lose nor replay events
+- [ ] Echo protection: changes sent by RxBridge itself do not loop back
+- [ ] Salesforce events are published to Kafka and update adverse-event-service
+- [ ] Reconnect with backoff on disconnect
 
-**Готово, коли:** змінили статус звіту в Salesforce — він оновився в web-ui; перезапуск sync-service не губить події.
+**Done when:** changing a report status in Salesforce updates it in web-ui, and restarting sync-service loses no events.
 
-## Етап 13 — Спостережуваність: tracing, метрики, логи (середньо)
+## Stage 13: Observability: tracing, metrics, logs (medium)
 
-Коли запит проходить через 5 сервісів і Kafka, без трасування неможливо зрозуміти, де він загубився. На демо це найефектніша частина.
+When a request passes through 5 services and Kafka, tracing is the only way to see where it got lost.
 
-**Що вивчаєте:** Micrometer Tracing, поширення trace ID через HTTP і Kafka, власні метрики, структуровані логи.
+**Topics:** Micrometer Tracing, trace ID propagation over HTTP and Kafka, custom metrics, structured logging.
 
-- [ ] Micrometer Tracing + Zipkin: один запит видно від web-ui до Salesforce
-- [ ] Trace ID у логах кожного сервісу; логи у форматі JSON
-- [ ] Prometheus + Grafana у `compose.yaml`
-- [ ] Власні метрики: кількість синхронізованих записів, помилки Salesforce, залишок денного ліміту API
-- [ ] Дашборд Grafana, експортований у репозиторій
-- [ ] Actuator health checks у всіх сервісах, включно з перевіркою зв'язку з Kafka і Salesforce
+- [ ] Micrometer Tracing + Zipkin: one request visible from web-ui to Salesforce
+- [ ] Trace ID in every service's logs; logs in JSON format
+- [ ] Prometheus + Grafana in `compose.yaml`
+- [ ] Custom metrics: synced records count, Salesforce errors, remaining daily API limit
+- [ ] Grafana dashboard exported to the repository
+- [ ] Actuator health checks in all services, including Kafka and Salesforce connectivity
 
-**Готово, коли:** у Zipkin видно повний шлях реєстрації через усі сервіси, а в Grafana — графік синхронізацій.
+**Done when:** Zipkin shows the full path of an enrollment through all services, and Grafana shows a sync chart.
 
-## Етап 14 — Фініш: CI/CD, contract tests, README (середньо)
+## Stage 14: CI/CD, contract tests, README (medium)
 
-Проєкт, який тімлід може запустити за 5 хвилин і зрозуміти за 10. Від цього етапу залежить, чи відкриють ваш код далі README.
+A project that a reviewer can start in 5 minutes and understand in 10.
 
-**Що вивчаєте:** GitHub Actions, Spring Cloud Contract, Docker-образи через Buildpacks або Jib.
+**Topics:** GitHub Actions, Spring Cloud Contract, Docker images with Buildpacks or Jib.
 
-- [ ] GitHub Actions у кожному сервісі: збірка й тести на кожен push, Testcontainers у CI
-- [ ] GitHub Actions у `rxbridge`: підняти всю систему через `compose.yaml` і прогнати наскрізний smoke-тест
-- [ ] Docker-образи в GitHub Container Registry
-- [ ] Contract tests між enrollment-service і adverse-event-service
-- [ ] Покриття тестами (JaCoCo), значок у README
-- [ ] README англійською: що це, Mermaid-схема архітектури, запуск однією командою, тестові логіни
-- [ ] Папка `docs/adr` у `rxbridge` з усіма рішеннями
-- [ ] GIF або 2-хвилинне відео демо
-- [ ] Налаштування для запуску без Salesforce org (профіль з WireMock), щоб проєкт працював у будь-кого
+- [ ] GitHub Actions in every service: build and test on every push, Testcontainers in CI
+- [ ] GitHub Actions in `rxbridge`: start the whole system via `compose.yaml` and run an end-to-end smoke test
+- [ ] Docker images in GitHub Container Registry
+- [ ] Contract tests between enrollment-service and adverse-event-service
+- [ ] Test coverage (JaCoCo) with a badge in the README
+- [ ] README: overview, Mermaid architecture diagram, one-command startup, test logins
+- [ ] `docs/adr` folder in `rxbridge` with all decisions
+- [ ] Demo GIF or 2-minute video
+- [ ] Profile for running without a Salesforce org (WireMock), so anyone can run the project
 
-**Готово, коли:** людина без вашої допомоги клонує репозиторій і запускає систему за 5 хвилин.
-
-## Коли оновлювати CV і орієнтовні терміни
-
-Оновлюйте CV і починайте відгукуватися після етапу 6 — не чекайте завершення всього проєкту. Терміни нижче — при 3–4 годинах на день; при меншому темпі множте приблизно на 1,5.
-
-| Блок | Етапи | Орієнтовно | Що вже можна сказати роботодавцю |
-| --- | --- | --- | --- |
-| Основа | 1–3 | 2 тижні | Spring Boot 3, JPA, Thymeleaf, Spring Security |
-| Інтеграції | 4–6 | 2–3 тижні | Мікросервіси, Resilience4j, Kafka, outbox, Salesforce API — **оновлюємо CV** |
-| Spring Cloud і безпека | 7–9 | 3 тижні | Spring Batch, Config/Eureka/Gateway, OAuth2, Keycloak, BFF |
-| Kotlin і складні патерни | 10–12 | 3 тижні | Kotlin, Saga, gRPC, Salesforce Pub/Sub API |
-| Фініш | 13–14 | 1–2 тижні | Observability, CI/CD, contract tests |
-
-У README на час пошуку роботи — розділ «Roadmap» з уже зробленим і наступними етапами. Незавершений, але живий проєкт з регулярними комітами виглядає краще, ніж «ідеальний», якого ще немає.
+**Done when:** someone can clone the repository and start the system in 5 minutes without help.

@@ -58,4 +58,4 @@ git clone --recurse-submodules <repository-url>
 - [ ] Stage 13: observability (tracing, metrics, logs)
 - [ ] Stage 14: CI/CD, contract tests, documentation
 
-The detailed plan (in Ukrainian) is in [docs/PLAN.md](docs/PLAN.md).
+The detailed plan is in [docs/PLAN.md](docs/PLAN.md).
