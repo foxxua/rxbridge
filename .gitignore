@@ -1,0 +1,18 @@
+# Idea
+.idea/
+*.iml
+
+# Secrets
+.env
+*.key
+*.pem
+*.p12
+*.jks
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Build
+build/
+.gradle/
