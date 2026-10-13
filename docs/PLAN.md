@@ -46,8 +46,8 @@ A single service with a REST API for patients and medication enrollments. The on
 
 **Topics:** Spring Boot 4 project structure, Controller → Service → Repository layers, Spring Data JPA, Flyway, Bean Validation, Java 25.
 
-- [ ] `rxbridge` repository (README skeleton, `.gitignore`, `docs/PLAN.md`)
-- [ ] `rxbridge-enrollment-service` repository (Gradle, Spring Initializr), added as a submodule
+- [x] `rxbridge` repository (README skeleton, `.gitignore`, `docs/PLAN.md`)
+- [x] `rxbridge-enrollment-service` repository (Gradle, Spring Initializr), added as a submodule
 - [ ] `Patient`, `Enrollment`, `Medication` entities; Flyway migrations
 - [ ] DTOs as `record`s; enrollment status as a `sealed interface` or `enum` with pattern-matching `switch`
 - [ ] CRUD endpoints with pagination and sorting
