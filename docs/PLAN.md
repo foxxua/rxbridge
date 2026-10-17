@@ -44,7 +44,7 @@ Each stage heading states its difficulty: easy, medium or hard.
 
 A single service with a REST API for patients and medication enrollments. The only infrastructure is PostgreSQL in `compose.yaml`, started by Spring Boot itself (`spring-boot-docker-compose`).
 
-**Topics:** Spring Boot 4 project structure, Controller → Service → Repository layers, Spring Data JPA, Flyway, Bean Validation, Java 25.
+**Topics:** Spring Boot 4 project structure, Controller → Service → Repository layers, Spring Data JPA, Flyway, Bean Validation, Actuator basics, Java 25.
 
 - [x] `rxbridge` repository (README skeleton, `.gitignore`, `docs/PLAN.md`)
 - [x] `rxbridge-enrollment-service` repository (Gradle, Spring Initializr), added as a submodule
@@ -56,6 +56,7 @@ A single service with a REST API for patients and medication enrollments. The on
 - [ ] `spring.threads.virtual.enabled=true`
 - [ ] Swagger UI via springdoc-openapi
 - [ ] Tests: unit (JUnit 5 + Mockito), `@WebMvcTest`, `@DataJpaTest` with Testcontainers
+- [ ] Actuator: only `health` and `info` exposed; `info` shows the build version (`springBoot { buildInfo() }`) and git commit (`gradle-git-properties` plugin)
 
 **Done when:** a patient and an enrollment can be created via Swagger UI and all tests pass.
 
@@ -71,6 +72,7 @@ A separate `rxbridge-web-ui` repository that calls enrollment-service directly a
 - [ ] `RestClient` with a base URL from `application.yml`; handling of service errors
 - [ ] JS and CSS served locally (WebJars or `static/`), no CDN
 - [ ] Controller tests with `@WebMvcTest` and a mocked client
+- [ ] First ADR: "Why virtual threads and `RestClient` instead of WebFlux"
 
 **Done when:** a patient can be found and enrolled in a medication program through the browser.
 
@@ -137,7 +139,7 @@ The direct call is replaced with reliable delivery: enrollment-service writes an
 - [ ] Retry and dead letter topic for failed events
 - [ ] Batching: accumulate events and send them to Composite API in groups
 - [ ] Integration tests with Testcontainers Kafka
-- [ ] First ADR: "Why outbox instead of publishing directly to Kafka"
+- [ ] ADR: "Why outbox instead of publishing directly to Kafka"
 
 **Done when:** with sync-service stopped, 10 enrollments are saved; after restarting it, all 10 reach Salesforce with no duplicates.
 
@@ -161,12 +163,13 @@ Bulk CSV upload from pharmacies and distribution centers. With Kafka in place, t
 
 With 5 services, addresses and settings are scattered across `application.yml` files and ports must be remembered. Now Spring Cloud solves a real problem.
 
-**Topics:** centralized configuration, service discovery, client-side load balancing, API Gateway, environment profiles.
+**Topics:** centralized configuration, service discovery, client-side load balancing, API Gateway, environment profiles, reactive basics (`Mono`/`Flux`) in Gateway filters.
 
 - [ ] `rxbridge-config` repository: settings for all services, `local` and `docker` profiles
 - [ ] `rxbridge-config-server` reads configuration from `rxbridge-config`
 - [ ] `rxbridge-discovery-server` (Eureka); Feign clients call services by name, not address
-- [ ] `rxbridge-api-gateway` (Spring Cloud Gateway): routes, rate limiting, CORS
+- [ ] `rxbridge-api-gateway` (Spring Cloud Gateway, reactive WebFlux variant): routes, rate limiting, CORS
+- [ ] Custom reactive `GlobalFilter`: correlation ID and request logging
 - [ ] web-ui calls services only through the Gateway
 - [ ] Run two instances of enrollment-service and verify load balancing
 - [ ] Full `compose.yaml`: all services plus infrastructure, health checks and startup order
@@ -247,7 +250,7 @@ When a request passes through 5 services and Kafka, tracing is the only way to s
 - [ ] Prometheus + Grafana in `compose.yaml`
 - [ ] Custom metrics: synced records count, Salesforce errors, remaining daily API limit
 - [ ] Grafana dashboard exported to the repository
-- [ ] Actuator health checks in all services, including Kafka and Salesforce connectivity
+- [ ] Custom Actuator health indicators for Kafka and Salesforce connectivity
 
 **Done when:** Zipkin shows the full path of an enrollment through all services, and Grafana shows a sync chart.
 
