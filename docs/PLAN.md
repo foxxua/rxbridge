@@ -271,3 +271,9 @@ A project that a reviewer can start in 5 minutes and understand in 10.
 - [ ] Profile for running without a Salesforce org (WireMock), so anyone can run the project
 
 **Done when:** someone can clone the repository and start the system in 5 minutes without help.
+
+## Technical debt
+
+Deliberate decisions to postpone work, not forgotten gaps.
+
+- [ ] Raise test coverage to production level. Tests currently follow risk: domain rules and state transitions, service checks outside the domain, one success, one validation error and one case per exception type in controllers, custom queries and database constraints in repositories. Not covered on purpose: every field and endpoint in controllers, mapping classes without logic.
