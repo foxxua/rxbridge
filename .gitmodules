@@ -1,3 +1,6 @@
 [submodule "rxbridge-enrollment-service"]
 	path = rxbridge-enrollment-service
 	url = ../rxbridge-enrollment-service.git
+[submodule "rxbridge-web-ui"]
+	path = rxbridge-web-ui
+	url = ../rxbridge-web-ui.git
