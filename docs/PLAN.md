@@ -49,14 +49,14 @@ A single service with a REST API for patients and medication enrollments. The on
 - [x] `rxbridge` repository (README skeleton, `.gitignore`, `docs/PLAN.md`)
 - [x] `rxbridge-enrollment-service` repository (Gradle, Spring Initializr), added as a submodule
 - [x] `Patient`, `Enrollment`, `Medication` entities; Flyway migrations
-- [ ] DTOs as `record`s; enrollment status as an `enum` with exhaustive `switch` expressions (sealed types and pattern matching come in stage 5, where variants carry different data)
-- [ ] CRUD endpoints with pagination and sorting
-- [ ] Validation: `@Valid`, a custom validator for the medication code format
-- [ ] Error handling with `@RestControllerAdvice` and `ProblemDetail`
-- [ ] `spring.threads.virtual.enabled=true`
-- [ ] Swagger UI via springdoc-openapi
-- [ ] Tests: unit (JUnit 5 + Mockito), `@WebMvcTest`, `@DataJpaTest` with Testcontainers
-- [ ] Actuator: only `health` and `info` exposed; `info` shows the build version (`springBoot { buildInfo() }`) and git commit (`gradle-git-properties` plugin)
+- [x] DTOs as `record`s; enrollment status as an `enum` with exhaustive `switch` expressions (sealed types and pattern matching come in stage 5, where variants carry different data)
+- [x] CRUD endpoints with pagination and sorting
+- [x] Validation: `@Valid`, a custom validator for the medication code format
+- [x] Error handling with `@RestControllerAdvice` and `ProblemDetail`
+- [x] `spring.threads.virtual.enabled=true`
+- [x] Swagger UI via springdoc-openapi
+- [x] Tests: unit (JUnit 5 + Mockito), `@WebMvcTest`, `@DataJpaTest` with Testcontainers
+- [x] Actuator: only `health` and `info` exposed; `info` shows the build version (`springBoot { buildInfo() }`) and git commit (`gradle-git-properties` plugin)
 
 **Done when:** a patient and an enrollment can be created via Swagger UI and all tests pass.
 
