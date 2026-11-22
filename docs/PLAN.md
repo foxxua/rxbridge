@@ -49,7 +49,7 @@ A single service with a REST API for patients and medication enrollments. The on
 - [x] `rxbridge` repository (README skeleton, `.gitignore`, `docs/PLAN.md`)
 - [x] `rxbridge-enrollment-service` repository (Gradle, Spring Initializr), added as a submodule
 - [x] `Patient`, `Enrollment`, `Medication` entities; Flyway migrations
-- [ ] DTOs as `record`s; enrollment status as a `sealed interface` or `enum` with pattern-matching `switch`
+- [ ] DTOs as `record`s; enrollment status as an `enum` with exhaustive `switch` expressions (sealed types and pattern matching come in stage 5, where variants carry different data)
 - [ ] CRUD endpoints with pagination and sorting
 - [ ] Validation: `@Valid`, a custom validator for the medication code format
 - [ ] Error handling with `@RestControllerAdvice` and `ProblemDetail`
@@ -117,6 +117,7 @@ A new `salesforce-sync-service`. For now data is sent via a plain HTTP call, wit
 - [ ] Connected App with a certificate; token via JWT Bearer flow, cached until expiry
 - [ ] Upsert by External Id via Composite API (up to 25 records per request)
 - [ ] Salesforce error handling: partial failures in Composite, 401 (refresh token), `REQUEST_LIMIT_EXCEEDED`
+- [ ] Per-record Composite result as a `sealed interface` of `record`s (success with Salesforce Id, failure with error code and message), handled with a pattern-matching `switch`
 - [ ] enrollment-service calls sync-service directly after saving
 - [ ] In web-ui: record sync status
 - [ ] Tests with WireMock simulating Salesforce responses
@@ -276,4 +277,5 @@ A project that a reviewer can start in 5 minutes and understand in 10.
 
 Deliberate decisions to postpone work, not forgotten gaps.
 
-- [ ] Raise test coverage to production level. Tests currently follow risk: domain rules and state transitions, service checks outside the domain, one success, one validation error and one case per exception type in controllers, custom queries and database constraints in repositories. Not covered on purpose: every field and endpoint in controllers, mapping classes without logic.
+- [x] Raise test coverage to production level. Tests currently follow risk: domain rules and state transitions, service checks outside the domain, one success, one validation error and one case per exception type in controllers, custom queries and database constraints in repositories. Not covered on purpose: every field and endpoint in controllers, mapping classes without logic.
+- [ ] Finish the OpenAPI contract tests in enrollment-service (`EnrollmentApiContractTest`). Both tests are `@Disabled` until this is done. The document is wrong: `@Schema(nullable = true)` on `EnrollmentView.closure` produced `{"type": "null", "$ref": "#/components/schemas/ClosureView"}`, and `types = {"object", "null"}` (current code) produces `$ref` next to `type`, which passes only because the validator ignores `$ref` with siblings. Annotations cannot produce the right form; add an `OpenApiCustomizer` that rewrites such properties to `anyOf` of the `$ref` and `{"type": "null"}` (theory 36.14). Cover a closed enrollment (reject or cancel with a reason other than `OTHER`, then `GET`), so a filled `closure` and a null `otherReason` are checked. Then regenerate the snapshot with `-Dopenapi.update=true` and review its diff. Optional: relative server URL `/` instead of `http://localhost:8080`.
